@@ -40,7 +40,7 @@ public class EndPhase {
 						player.kickPlayer(ChatUtils.colorize("The server is restarting. \n Please join back and check http://www.mscg.rip for more servers."));
 					}
 					try {
-						ZipUtils.delete(new File(game.getCurrentMap().getName()));
+						ZipUtils.delete(new File(Core.getMaps().getString(game.getCurrentMap() + ".name")));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}

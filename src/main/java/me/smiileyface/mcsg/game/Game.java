@@ -1,25 +1,31 @@
 package me.smiileyface.mcsg.game;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Creature;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+import me.smiileyface.mcsg.Core;
 import me.smiileyface.mcsg.event.GameStateChangeEvent;
 import me.smiileyface.mcsg.game.phase.CountdownPhase;
 import me.smiileyface.mcsg.game.phase.DeathmatchPhase;
 import me.smiileyface.mcsg.game.phase.EndPhase;
 import me.smiileyface.mcsg.game.phase.GamePhase;
 import me.smiileyface.mcsg.game.phase.LobbyPhase;
-import me.smiileyface.mcsg.map.Map;
-import me.smiileyface.mcsg.map.MapManager;
 import me.smiileyface.mcsg.player.GamePlayer;
 import me.smiileyface.utils.ChatUtils;
+import me.smiileyface.utils.ZipUtils;
 
 public class Game {
 
-	public MapManager mapManager;
 	private boolean voting;
 	private int maxVotingMaps;
 	private int reqPlayers, maxPlayers;
@@ -35,7 +41,8 @@ public class Game {
 	private DeathmatchPhase deathmatchPhase;
 	private EndPhase endPhase;
 
-	private Map map;
+	private int map;
+	private Location lobbySpawn;
 	private List<GamePlayer> players = new ArrayList<GamePlayer>();
 	private List<GamePlayer> spectators = new ArrayList<GamePlayer>();
 	public ArrayList<GamePlayer> voted = new ArrayList<GamePlayer>();
@@ -44,8 +51,7 @@ public class Game {
 
 	private boolean forcedStart = false;
 
-	public Game(MapManager mapManager, boolean voting, int lobbyTime, int maxVotingMaps, int reqPlayers) {
-		this.mapManager = mapManager;
+	public Game(boolean voting, int lobbyTime, int maxVotingMaps, int reqPlayers) {
 		this.voting = voting;
 		this.lobbyTime = lobbyTime;
 		this.maxVotingMaps = maxVotingMaps;
@@ -163,10 +169,6 @@ public class Game {
 		return endPhase;
 	}
 
-	public MapManager getMapManager() {
-		return mapManager;
-	}
-
 	public boolean isVoting() {
 		return voting;
 	}
@@ -226,14 +228,79 @@ public class Game {
 		this.deathmatchTime = time;
 	}
 
-	public Map getCurrentMap() {
+	public int getCurrentMap() {
 		return map;
 	}
 
-	public void setCurrentMap(Map map) {
+	public void setCurrentMap(int map) {
 		this.map = map;
 	}
+	
+	public String serializeLocation(Location l) {
+		return l.getWorld().getName() + "=" + l.getX() + "=" + l.getY() + "=" + l.getZ() + "=" + l.getPitch() + "="
+				+ l.getYaw();
+	}
+	
+	public Location unserializeLocation(String l) {
+		String[] split = l.split("=");
+		Location loc = new Location(Bukkit.getWorld(split[0]), Double.parseDouble(split[1]),
+				Double.parseDouble(split[2]), Double.parseDouble(split[2]));
+		loc.setPitch(Float.parseFloat(split[4]));
+		loc.setYaw(Float.parseFloat(split[5]));
+		return loc;
+	}
+	
+	public void joinSpawns(List<GamePlayer> players) {
+		List<String> spawns = Core.getMaps().getList(map + ".spawns");
+		for (int i = 0; i < players.size(); i++) {
+			if (i < Bukkit.getOnlinePlayers().size()) {
+				String[] spawn = ((String) spawns.get(i)).split("=");
 
+				Location l = new Location(Bukkit.getWorld(spawn[0]), Double.parseDouble(spawn[1]),
+						Double.parseDouble(spawn[2]), Double.parseDouble(spawn[3]));
+				l.setPitch(Float.parseFloat(spawn[4]));
+				l.setYaw(Float.parseFloat(spawn[5]));
+				l.getChunk().load();
+				players.get(i).getPlayer().teleport(l);
+			}
+		}
+	}
+	
+	public void joinDMSpawns(List<GamePlayer> players) {
+		List<String> spawns = Core.getMaps().getList(map + ".deathmatch-spawns");
+		for (int i = 0; i < players.size(); i++) {
+			if (i < Bukkit.getOnlinePlayers().size()) {
+				String[] spawn = ((String) spawns.get(i)).split("=");
+
+				Location l = new Location(Bukkit.getWorld(spawn[0]), Double.parseDouble(spawn[1]),
+						Double.parseDouble(spawn[2]), Double.parseDouble(spawn[3]));
+				l.setPitch(Float.parseFloat(spawn[4]));
+				l.setYaw(Float.parseFloat(spawn[5]));
+				l.getChunk().load();
+				players.get(i).getPlayer().teleport(l);
+			}
+		}
+	}
+	
+	public Location getLobbySpawn() {
+		String[] lsplit = Core.getConfigFile().getString("lobby-spawn").split("=");
+
+		this.lobbySpawn = new Location(Bukkit.getWorld(lsplit[0]), Double.parseDouble(lsplit[1]),
+				Double.parseDouble(lsplit[2]), Double.parseDouble(lsplit[3]));
+		this.lobbySpawn.setPitch(Float.parseFloat(lsplit[4]));
+		this.lobbySpawn.setYaw(Float.parseFloat(lsplit[5]));
+
+		return this.lobbySpawn;
+	}
+
+	public void loadMap(VoteMap map) {
+		try {
+			ZipUtils.extractZIP(new File(Core.get().getDataFolder() + "/maps/" + map.mapName + ".zip"), new File(Core.getMaps().getString(map.mapName)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public List<GamePlayer> getPlayers() {
 		return players;
 	}

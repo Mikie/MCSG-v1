@@ -6,7 +6,6 @@ import org.bukkit.scheduler.BukkitTask;
 import me.smiileyface.mcsg.Core;
 import me.smiileyface.mcsg.game.Game;
 import me.smiileyface.mcsg.game.GameState;
-import me.smiileyface.mcsg.map.Map;
 import me.smiileyface.mcsg.player.GamePlayer;
 import me.smiileyface.utils.ChatUtils;
 import me.smiileyface.utils.TimeUtils;
@@ -17,9 +16,9 @@ public class CountdownPhase {
 	private BukkitTask task;
 	private boolean running;
 	private int time;
-	private Map map;
+	private int map;
 	
-	public CountdownPhase(Game game, Map map) {
+	public CountdownPhase(Game game, int map) {
 		this.game = game;
 		this.map = map;
 	}
@@ -33,16 +32,7 @@ public class CountdownPhase {
 	public void start() {
 		running = true;
 		
-		for(int i = 0; i < game.getPlayers().size(); i++) {
-			GamePlayer player = game.getPlayers().get(i);
-			
-			player.setSpawnIndex(i);
-			player.getPlayer().teleport(game.getMapManager().getSpawns(map).get(i));
-			
-			for(GamePlayer oplayer : game.getPlayers()) {
-				player.getPlayer().showPlayer(oplayer.getPlayer());
-			}
-		}
+		game.joinSpawns(game.getPlayers());
 		
 		task = Bukkit.getScheduler().runTaskTimer(Core.get(), new Runnable() {
 			
@@ -50,9 +40,8 @@ public class CountdownPhase {
 			public void run() {
 				if(time == 27) {
 					for(GamePlayer player : game.getPlayers()) {
-						player.getPlayer().sendMessage(ChatUtils.colorize("&e(Map Info) &a" + map.getName()));
-						player.getPlayer().sendMessage(ChatUtils.colorize("&e(Map Info) &a" + map.getAuthor()));
-						player.getPlayer().sendMessage(ChatUtils.colorize("&e(Map Info) &a" + map.getLink()));
+						player.getPlayer().sendMessage(ChatUtils.colorize("&e(Map Info) &a" + Core.getMaps().getString(map + ".name")));
+						player.getPlayer().sendMessage(ChatUtils.colorize("&e(Map Info) &a" + Core.getMaps().getString(map + ".author")));
 					}
 				}
 				

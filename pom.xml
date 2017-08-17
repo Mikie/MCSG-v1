@@ -125,7 +125,7 @@
 						<configuration>
 							<artifactSet>
 								<includes>
-									<lnclude>redis.clients:jedis:2.9.0</lnclude>
+									<lnclude>redis.clients:jedis</lnclude>
 									<include>org.apache.commons:commons-pool2</include>
 									<include>org.apache.httpcomponents:httpclient</include>
 									<include>org.apache.httpcomponents:httpcore</include>

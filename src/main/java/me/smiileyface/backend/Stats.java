@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import org.bukkit.entity.Player;
 
 import me.smiileyface.backend.database.DBConnection;
+import me.smiileyface.backend.stats.PlayerChestsOpened;
 import me.smiileyface.backend.stats.PlayerDeaths;
 import me.smiileyface.backend.stats.PlayerGamesPlayed;
 import me.smiileyface.backend.stats.PlayerKills;
@@ -18,6 +19,7 @@ import me.smiileyface.backend.stats.PlayerWins;
 
 public class Stats {
 
+	private static PlayerChestsOpened pc = new PlayerChestsOpened();
 	private static PlayerDeaths pd = new PlayerDeaths();
 	private static PlayerGamesPlayed pgp = new PlayerGamesPlayed();
 	private static PlayerKills pk = new PlayerKills();
@@ -26,6 +28,10 @@ public class Stats {
 	private static PlayerPoints pp = new PlayerPoints();
 	private static PlayerWins pw = new PlayerWins();
 
+	public static PlayerChestsOpened getChestsOpened() {
+		return pc;
+	}
+	
 	public static PlayerDeaths getDeaths() {
 		return pd;
 	}

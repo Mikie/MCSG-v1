@@ -1,8 +1,7 @@
 package me.smiileyface.mcsg.game.phase;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -12,7 +11,7 @@ import org.bukkit.scheduler.BukkitTask;
 import me.smiileyface.mcsg.Core;
 import me.smiileyface.mcsg.game.Game;
 import me.smiileyface.mcsg.game.GameState;
-import me.smiileyface.mcsg.map.Map;
+import me.smiileyface.mcsg.game.VoteMap;
 import me.smiileyface.mcsg.player.GamePlayer;
 import me.smiileyface.utils.ChatUtils;
 import me.smiileyface.utils.TimeUtils;
@@ -24,7 +23,9 @@ public class LobbyPhase {
 	private boolean running = false;
 	private int time;
 	
-	public ArrayList<Map> voteMaps = new ArrayList<Map>();
+	public int mapAmount = 0;
+	public ArrayList<Integer> maps = new ArrayList<Integer>();
+	public HashMap<Integer, VoteMap> voteMaps = new HashMap<Integer, VoteMap>();
 	
 	public LobbyPhase(Game game) {
 		this.game = game;
@@ -32,6 +33,13 @@ public class LobbyPhase {
 	
 	public void load() {
 		game.setState(GameState.LOBBY);
+		for(int i = 0; i < 999; i++) {
+			if(Core.getMaps().contains("" + i)) {
+				mapAmount = i;
+				break;
+			}
+		}
+		selectMaps();
 		chooseRandomMaps();
 		time = game.getLobbyTime();
 		start();
@@ -50,16 +58,13 @@ public class LobbyPhase {
 					task.cancel();
 					running = false;
 					time = game.getLobbyTime();
-					Map winner  = getMostVotedMap();
-					game.getMapManager().loadMap(winner);
-					game.getMapManager().getSpawns(winner).get(0).getWorld().setTime(0);
+					VoteMap winner  = getMostVotedMap();
+					game.loadMap(winner);
 					
-					game.setCurrentMap(winner);
+					game.setCurrentMap(winner.mapID);
 					game.startCountdown();
-					for(Map map : voteMaps) {
-						map.setVotes(0);
-					}
-					voteMaps.clear();
+
+					maps.clear();
 					game.getVoted().clear();
 					return;
 				}
@@ -70,22 +75,20 @@ public class LobbyPhase {
 		}, 0L, 20L);
 	}
 	
-	public List<Map> getMaps() {
+	public HashMap<Integer, VoteMap> getMaps() {
 		return voteMaps;
 	}
 	
-	public Map getMostVotedMap() {
-		Map mostVoted = null;
-		
-		int votes = 0;
-		for(Map map : voteMaps) {
-			if(map.getVotes() > votes) {
-				votes = map.getVotes();
-				mostVoted = map;
+	public VoteMap getMostVotedMap() {
+		VoteMap mostVoted = new VoteMap(999);
+	
+		for(VoteMap m : voteMaps.values()) {
+			if((mostVoted.mapID == 999) || (m.votes > mostVoted.votes)) {
+				mostVoted = m;
 			}
 		}
 		
-		if(mostVoted == null)
+		if(mostVoted.mapID == 999)
 			mostVoted = voteMaps.get(new Random().nextInt(voteMaps.size()));
 		return mostVoted;
 	}
@@ -94,14 +97,14 @@ public class LobbyPhase {
 		return !game.getVoted().contains(player);
 	}
 	
-	public Map vote(GamePlayer p, int id) {
+	public VoteMap vote(GamePlayer p, int id) {
 		try {
-			Map m = voteMaps.get(id - 1);
+			VoteMap m = voteMaps.get(id - 1);
 			if(m != null) {
 				int amount = p.getVoteAmount();
-				m.setVotes(m.getVotes() + amount);
+				m.votes = m.votes + amount;
 				game.getVoted().add(p);
-				p.getPlayer().sendMessage(ChatUtils.modulate("SurvivalGames", "You voted for " + m.getName()));
+				p.getPlayer().sendMessage(ChatUtils.modulate("SurvivalGames", "You voted for " + m.mapName));
 			}
 			
 			return m;
@@ -119,8 +122,8 @@ public class LobbyPhase {
 				player.sendMessage(ChatUtils.modulate("SurvivalGames", "Vote for maps using /vote #."));
 				player.sendMessage(ChatUtils.modulate("SurvivalGames", "Want different options? Use /skip"));
 				int i = 1;
-				for(Map map : voteMaps) {
-					player.sendMessage(ChatUtils.modulate("SurvivalGames", i + " : " + map.getName() + " (" + map.getAuthor() + ") (" + map.getVotes() + ")"));
+				for(VoteMap map : voteMaps.values()) {
+					player.sendMessage(ChatUtils.modulate("SurvivalGames", i + " : " + map.mapName +  "&8(&e" + map.votes + "&8)"));
 					i++;
 				}
 			}
@@ -128,17 +131,39 @@ public class LobbyPhase {
 	}
 	
 	private void chooseRandomMaps() {
-		List<Map> maps = game.getMapManager().getMaps();
-		
+		if(!maps.isEmpty()) {
+			if(mapAmount > game.getMaxVotingMaps()) {
+				Random r = new Random();
+				for(int i = 0; i < game.getMaxVotingMaps(); i++) {
+					int ran = r.nextInt(mapAmount);
+					int newRan = 0;
+					while(maps.contains(Integer.valueOf(ran))) {
+						newRan = r.nextInt(mapAmount);
+						if(!maps.contains(Integer.valueOf(newRan))) {
+							ran = newRan;
+						}
+					}
+					maps.add(Integer.valueOf(ran));
+					
+					voteMaps.put(i, new VoteMap(ran));
+				}
+			} else {
+				for(int i = 0; i < mapAmount; i++) {
+					if(Core.getMaps().contains("" + i)) {
+						maps.add(Integer.valueOf(i));
+						voteMaps.put(i, new VoteMap(i));
+					}
+				}
+			}
+		}
+	}
+	
+	public void selectMaps() {
 		voteMaps.clear();
-		Collections.shuffle(maps);
-		
-		int i = 0;
-		for(Map m : maps) {
-			if(i == game.getMaxVotingMaps())
-				break;
-			voteMaps.add(m);
-			i++;
+		for(int i = 0; i < 999; i++) {
+			if(Core.getMaps().contains(String.valueOf(i))) {
+				voteMaps.put(i, new VoteMap(i));
+			}
 		}
 	}
 	

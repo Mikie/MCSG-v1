@@ -35,12 +35,10 @@ public class DeathmatchPhase {
 		
 		game.setState(GameState.DEATHMATCH);
 		
-		for(GamePlayer player : game.getPlayers()) {
-			player.getPlayer().teleport(game.getMapManager().getSpawns(game.getCurrentMap()).get(player.getSpawnIndex()));
-		}
+		game.joinDMSpawns(game.getPlayers());
 		
 		for(GamePlayer player : game.getSpectators()) {
-			player.getPlayer().teleport(game.getMapManager().getSpawns(game.getCurrentMap()).get(0));
+			player.getPlayer().teleport(game.getPlayers().get(0).getPlayer().getLocation());
 			Vector v = new Vector(0, 2, 0);
 			v.multiply(1.25);
 			player.getPlayer().getLocation().setDirection(v);

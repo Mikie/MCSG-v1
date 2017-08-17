@@ -3,6 +3,8 @@ package me.smiileyface.backend.players;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import me.smiileyface.utils.ChatUtils;
+
 public enum Rank {
 
 	OWNER(9, "Owner", ChatColor.DARK_RED),
@@ -51,9 +53,13 @@ public enum Rank {
 		return "";
 	}
 	
-	public boolean has(Player player, Rank rank) {
+	public boolean has(Player player, Rank rank, boolean inform) {
 		if(compareTo(rank) <= 0)
 			return true;
+		else if(inform && compareTo(rank) > 0) {
+			player.sendMessage(ChatUtils.modulate("SurvivalGames", "&cYou do not have have permission to do this."));
+			return false;
+		}
 		return false;
 	}
 }

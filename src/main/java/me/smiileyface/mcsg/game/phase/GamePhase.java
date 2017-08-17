@@ -43,14 +43,11 @@ public class GamePhase {
 		running = true;
 		players = game.getPlayers().size();
 		
-		game.getCurrentMap().getMinimumLocation().getWorld().setTime(0);
-		
 		chestRefill = Bukkit.getScheduler().runTaskLater(Core.get(), new Runnable() {
 			
 			@Override
 			public void run() {
-				long time = game.getCurrentMap().getMinimumLocation().getWorld().getTime();
-				if(time >= 18000 && time <= 18200) {
+				if(time <= 60 * 20) {
 					
 					Bukkit.broadcastMessage(ChatUtils.modulate("SurvivalGames", "&3These tributes have passed... : &2" + Arrays.asList(game.deadPlayers)));
 					Bukkit.broadcastMessage(ChatUtils.modulate("SurvivalGames", "&3Sponsords have refilled &eall &3of the chests!"));

@@ -1,14 +1,10 @@
 package me.smiileyface.mcsg;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
@@ -16,15 +12,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.smiileyface.backend.Servers;
 import me.smiileyface.backend.database.DBConnection;
+import me.smiileyface.mcsg.command.admin.AdminCommands;
+import me.smiileyface.mcsg.command.user.Vote;
 import me.smiileyface.mcsg.event.GameStateChangeEvent;
+import me.smiileyface.mcsg.game.Chests;
 import me.smiileyface.mcsg.game.Game;
 import me.smiileyface.mcsg.listener.ChatListener;
 import me.smiileyface.mcsg.listener.PlayerListener;
 import me.smiileyface.mcsg.listener.SpectatorListener;
-import me.smiileyface.mcsg.map.Lobby;
-import me.smiileyface.mcsg.map.Map;
-import me.smiileyface.mcsg.map.MapManager;
-import me.smiileyface.utils.StringUtils;
 
 public class Core extends JavaPlugin implements Listener {
 
@@ -32,53 +27,42 @@ public class Core extends JavaPlugin implements Listener {
 	private final static String PLAYERS_DATABASE = "CREATE TABLE IF NOT EXISTS players (id INT NOT NULL AUTO_INCREMENT, username VARCHAR(40), uuid VARCHAR(256), rank INT, rankExpiry LONG, lastip VARCHAR(40), PRIMARY KEY (id));";
 	private final static String STATS_DATABASE = "CREATE TABLE IF NOT EXISTS stats (username VARCHAR(40), uuid VARCHAR(256), wins INT, losses INT, gamesplayed INT, kills INT, deaths INT, points INT, lifespan LONG, chestsOpened INT);";
 	private final static String PUNISHMENTS_DATABASE = "CREATE TABLE IF NOT EXISTS punishments (id INT NOT NULL, punished VARCHAR(256), ipAddress VARCHAR(40), issuer VARCHAR(256), type VARCHAR(40), reason VARCHAR(256), time VARCHAR(40), end LONG, active BOOL, PRIMARY KEY (id));";
-	
+
 	private static Core instance;
+
 	public static Core get() {
 		return instance;
 	}
-	
+
+	private static SettingsManager c;
+	private static SettingsManager ch;
+	private static SettingsManager m;
+
 	private Game game;
-	private MapManager mapManager;
-	
-	public static FileConfiguration maps;
-	
+
 	@Override
 	public void onEnable() {
 		instance = this;
+
+		c = new SettingsManager("config");
+		ch = new SettingsManager("chests");
+		m = new SettingsManager("maps");
 		
-		mapManager = new MapManager();
+		writeToConfig();
+		writeToChests();
 		
-		maps = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "maps.yml"));
+		getCommand("sg").setExecutor(new AdminCommands());
+		getCommand("vote").setExecutor(new Vote());
 		
-		getConfig().addDefault("lobby.name", "Lobby");
-		getConfig().addDefault("lobby.world", "world");
-		getConfig().addDefault("lobby.spawn-location", "0,100,0,0,0");
-		
-		saveMaps();
-		saveConfig();
-		
-		mapManager.setupLobby(new Lobby(getConfig().getString("lobby.name"), getConfig().getString("lobby.world")));
-		mapManager.getLobby().getWorld();
-		for(String map : maps.getConfigurationSection("maps").getKeys(false)) {
-			Map m = new Map(StringUtils.strToLoc(Bukkit.getWorld(maps.getString("maps." + map + ".name")), maps.getString("maps." + map + ".min")), 
-					StringUtils.strToLoc(Bukkit.getWorld(maps.getString("maps." + map + ".name")), maps.getString("maps." + map + ".max")), 
-					maps.getString("maps." + map + ".name"), 
-					maps.getString("maps." + map + ".author"), 
-					maps.getString("maps." + map + ".link"), 
-					StringUtils.strToLoc(Bukkit.getWorld(maps.getString("maps." + map + ".name")), maps.getString("maps." + map + ".middle")), 
-					maps.getInt("maps." + map + ".radius"));
-			getMapManager().setupMap(m);
-		}
-		
-		game = new Game(mapManager, true, 60*3, 4, 2);
-		
+		game = new Game(true, 60 * 3, 4, 2);
+
 		PluginManager pm = Bukkit.getServer().getPluginManager();
 		pm.registerEvents(this, this);
 		pm.registerEvents(new ChatListener(), this);
 		pm.registerEvents(new PlayerListener(), this);
 		pm.registerEvents(new SpectatorListener(), this);
-		
+		pm.registerEvents(new Chests(), this);
+
 		try {
 			Connection c = DBConnection.getDatabase().getConnection();
 			PreparedStatement servers = c.prepareStatement(SERVERS_DATABASE);
@@ -97,38 +81,57 @@ public class Core extends JavaPlugin implements Listener {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		if(Servers.getData().isInDatabase()) {
+
+		if (Servers.getData().isInDatabase()) {
 			Servers.getData().updateAllInfo();
 		} else {
 			Servers.getData().addToDatabase();
 		}
 	}
+
+	private void writeToConfig() {
+		c.createPath("SQL", "");
+		c.createPath("SQL.database", "mcsg");
+		c.createPath("SQL.username", "root");
+		c.createPath("SQL.password", "Minecraft1337");
+		c.createPath("serverName", "US1");
+		c.createPath("lobby-spawn", "0,75,0,0,0");
+	}
+
+	private void writeToChests() {
+		ch.createPath("max-items", Integer.valueOf(8));
+		ch.createPath("max-items-doublechest", Integer.valueOf(16));
+		ch.createPath("rarer-tier2", Boolean.valueOf(true));
+		ch.createPath("restock-time", Integer.valueOf(600));
+		ch.createStringList("tier1",
+				new String[] { "WOOD_SWORD", "STONE_AXE", "GOLD_SWORD", "GOLD_AXE", "WOOD_AXE", "FISHING_ROD", "BOW",
+						"ARROW", "ARROW, 3", "ARROW, 5", "COOKED_FISH", "RAW_FISH, 2", "APPLE, 3", "LEATHER_HELMET",
+						"LEATHER_CHESTPLATE", "LEATHER_LEGGINGS", "LEATHER_BOOTS", "GOLD_INGOT", "STICK" });
+
+		ch.createStringList("tier2",
+				new String[] { "STONE_SWORD", "IRON_AXE", "IRON_HELMET", "IRON_CHESTPLATE", "IRON_LEGGINGS",
+						"IRON_BOOTS", "CHAINMAIL_HELMET", "CHAINMAIL_CHESTPLATE", "CHAINMAIL_LEGGINGS",
+						"CHAINMAIL_BOOTS", "GOLD_HELMET", "GOLD_CHESTPLATE", "GOLD_LEGGINGS", "GOLD_BOOTS", "ARROW, 5",
+						"ARROW, 7", "FLINT_AND_STEEL", "DIAMOND", "IRON_INGOT", "GOLD_INGOT, 2", "STICK, 2",
+						"GOLDEN_APPLE", "GOLDEN_CARROT", "BAKED_POTATO", "COOKED_BEEF", "COOKED_CHICKEN" });
+	}
+
+	public static SettingsManager getConfigFile() {
+		return c;
+	}
 	
-	public MapManager getMapManager() {
-		return mapManager;
+	public static SettingsManager getMaps() {
+		return m;
+	}
+	
+	public static SettingsManager getChests() {
+		return ch;
 	}
 	
 	public Game getGame() {
 		return game;
 	}
-	
-	public void saveMaps() {
-		try  {
-			maps.save("plugins/MCSG/maps.yml");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void saveConfig() {
-		try  {
-			getConfig().save("plugins/MCSG/config.yml");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
+
 	@EventHandler
 	public void onStateChange(GameStateChangeEvent e) {
 		Servers.getData().updateAllInfo();

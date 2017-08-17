@@ -43,7 +43,7 @@ public class ServerData {
 			+ Bukkit.getPort() + ", '"
 			+ System.currentTimeMillis() / 1000 + "', "
 			+ Servers.getState().getNumberFromState(Core.get().getGame().getState()) + ", '"
-			+ (Core.get().getGame().getState() == GameState.LOBBY ? Core.get().getMapManager().getLobby().getName() : Core.get().getGame().getCurrentMap().getName()) + "', "
+			+ (Core.get().getGame().getState() == GameState.LOBBY ? "Lobby" : Core.getMaps().getString(Core.get().getGame().getCurrentMap() + ".name")) + "', "
 			+ Core.get().getGame().getPlayers().size()
 			+ ");");
 		} catch (SQLException e) {
@@ -107,7 +107,7 @@ public class ServerData {
 			Connection c = DBConnection.getDatabase().getConnection();
 			PreparedStatement ps = c.prepareStatement("UPDATE servers SET gamestate=?, mapname=?, players=?, lastchange=? WHERE nickname=?");
 			ps.setInt(1, Servers.getState().getNumberFromState(Core.get().getGame().getState()));
-			ps.setString(2, Core.get().getGame().getState() == GameState.LOBBY ? Core.get().getMapManager().getLobby().getName() : Core.get().getGame().getCurrentMap().getName());
+			ps.setString(2, Core.get().getGame().getState() == GameState.LOBBY ? "Lobby" : Core.getMaps().getString(Core.get().getGame().getCurrentMap() + ".name"));
 			ps.setInt(3, Core.get().getGame().getPlayers().size());
 			ps.setString(4, "" + System.currentTimeMillis() / 1000);
 			ps.setString(5, getName());

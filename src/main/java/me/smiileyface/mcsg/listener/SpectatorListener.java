@@ -55,6 +55,10 @@ public class SpectatorListener implements Listener {
 
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent event) {
+		if(g.getState() == GameState.DEAD) {
+			event.setCancelled(false);
+			return;
+		}
 		if (GamePlayer.getPlayer(event.getPlayer().getDisplayName()).isInSpecChat() || g.getState() == GameState.LOBBY || g.getState() == GameState.STARTING || g.getState() == GameState.ENDING) 
 			event.setCancelled(true);
 		if(g.getPlayers().contains(GamePlayer.getPlayer(event.getPlayer().getDisplayName()))) {
@@ -65,29 +69,49 @@ public class SpectatorListener implements Listener {
 
 	@EventHandler
 	public void onBlockPlace(BlockPlaceEvent event) {
+		if(g.getState() == GameState.DEAD) {
+			event.setCancelled(false);
+			return;
+		}
 		event.setCancelled(true);
 	}
 
 	@EventHandler
 	public void onItemPickup(PlayerPickupItemEvent event) {
+		if(g.getState() == GameState.DEAD) {
+			event.setCancelled(false);
+			return;
+		}
 		if (GamePlayer.getPlayer(event.getPlayer().getDisplayName()).isInSpecChat() || g.getState() == GameState.LOBBY || g.getState() == GameState.STARTING || g.getState() == GameState.ENDING) 
 			event.setCancelled(true);
 	}
 
 	@EventHandler
 	public void onItemDrop(PlayerDropItemEvent event) {
+		if(g.getState() == GameState.DEAD) {
+			event.setCancelled(false);
+			return;
+		}
 		if (GamePlayer.getPlayer(event.getPlayer().getDisplayName()).isInSpecChat() || g.getState() == GameState.LOBBY || g.getState() == GameState.STARTING || g.getState() == GameState.ENDING)
 			event.setCancelled(true);
 	}
 
 	@EventHandler
 	public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+		if(g.getState() == GameState.DEAD) {
+			event.setCancelled(false);
+			return;
+		}
 		if (GamePlayer.getPlayer(event.getPlayer().getDisplayName()).isInSpecChat() || g.getState() == GameState.LOBBY || g.getState() == GameState.STARTING || g.getState() == GameState.ENDING) 
 			event.setCancelled(true);
 	}
 
 	@EventHandler
 	public void onEntityTarget(EntityTargetEvent event) {
+		if(g.getState() == GameState.DEAD) {
+			event.setCancelled(false);
+			return;
+		}
 		if (event.getTarget() instanceof Player) {
 			Player p = (Player) event.getTarget();
 			if (GamePlayer.getPlayer(p.getDisplayName()).isInSpecChat() || g.getState() == GameState.LOBBY || g.getState() == GameState.STARTING || g.getState() == GameState.ENDING) 
@@ -97,12 +121,19 @@ public class SpectatorListener implements Listener {
 
 	@EventHandler
 	public void onExpChangeEvent(PlayerExpChangeEvent event) {
+		if(g.getState() == GameState.DEAD) {
+			return;
+		}
 		if (GamePlayer.getPlayer(event.getPlayer().getDisplayName()).isInSpecChat())
 			event.setAmount(0);
 	}
 
 	@EventHandler
 	public void onEntityDamage(EntityDamageByEntityEvent event) {
+		if(g.getState() == GameState.DEAD) {
+			event.setCancelled(false);
+			return;
+		}
 		Player damager = null;
 		if (event.getDamager() instanceof Player) {
 			damager = (Player) event.getDamager();
@@ -121,6 +152,10 @@ public class SpectatorListener implements Listener {
 
 	@EventHandler
 	public void onEntityDamage(EntityDamageEvent event) {
+		if(g.getState() == GameState.DEAD) {
+			event.setCancelled(false);
+			return;
+		}
 		if (event.getEntity() instanceof Player) {
 			Player p = (Player) event.getEntity();
 			if (GamePlayer.getPlayer(p.getDisplayName()).isInSpecChat() || g.getState() == GameState.LOBBY || g.getState() == GameState.STARTING || g.getState() == GameState.ENDING) 
@@ -130,6 +165,10 @@ public class SpectatorListener implements Listener {
 
 	@EventHandler
 	public void onFoodLevelChange(FoodLevelChangeEvent event) {
+		if(g.getState() == GameState.DEAD) {
+			event.setCancelled(false);
+			return;
+		}
 		if (event.getEntity() instanceof Player) {
 			Player p = (Player) event.getEntity();
 			if (GamePlayer.getPlayer(p.getDisplayName()).isInSpecChat() || g.getState() == GameState.LOBBY || g.getState() == GameState.STARTING || g.getState() == GameState.ENDING) 

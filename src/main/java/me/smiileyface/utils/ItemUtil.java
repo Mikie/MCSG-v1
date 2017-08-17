@@ -1,68 +1,97 @@
 package me.smiileyface.utils;
 
-import java.util.HashMap;
-
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import me.smiileyface.mcsg.SettingsManager;
+
 public class ItemUtil {
 
-	private static HashMap<String, Enchantment> encids;
+	public static ItemStack unserializeItemStack(String path, SettingsManager file) {
+		String i = file.getString(path);
 
-	private static void loadIds() {
-
-		encids = new HashMap<String, Enchantment>();
-
-		for (Enchantment e : Enchantment.values()) {
-			encids.put(e.toString().toLowerCase().replace("_", ""), e);
-		}
-
-		encids.put("sharpness", Enchantment.DAMAGE_ALL);
-		encids.put("dmg", Enchantment.DAMAGE_ALL);
-		encids.put("fire", Enchantment.FIRE_ASPECT);
-
-	}
-
-	public static ItemStack read(String str) {
-		if (encids == null) {
-			loadIds();
-		}
-		String split[] = str.split(",");
-		for (int a = 0; a < split.length; a++) {
-			split[a] = split[a].toLowerCase().trim();
-		}
-		if (split.length < 1) {
-			return null;
-		} else if (split.length == 1) {
-			return new ItemStack(Integer.parseInt(split[0]));
-		} else if (split.length == 2) {
-			return new ItemStack(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
-		} else if (split.length == 3) {
-			return new ItemStack(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Short.parseShort(split[2]));
+		ItemStack item = new ItemStack(Material.AIR);
+		ItemMeta meta = item.getItemMeta();
+		if (i.contains(",")) {
+			String[] data = i.replaceAll(" ", "").split(",");
+			try {
+				item.setType(Material.getMaterial(data[0]));
+				item.setAmount(Integer.parseInt(data[1]));
+			} catch (NullPointerException x) {
+				item.setType(Material.getMaterial(Integer.parseInt(data[0])));
+				item.setAmount(Integer.parseInt(data[1]));
+			}
 		} else {
-			ItemStack i = new ItemStack(Integer.parseInt(split[0]), Integer.parseInt(split[1]),
-					Short.parseShort(split[2]));
-			String encs[] = split[3].split(" ");
-			for (String enc : encs) {
-				System.out.println(enc);
-				String e[] = enc.split(":");
-				i.addUnsafeEnchantment(encids.get(e[0]), Integer.parseInt(e[1]));
+			try {
+				item.setType(Material.getMaterial(i));
+			} catch (NullPointerException x) {
+				item.setType(Material.getMaterial(Integer.parseInt(i)));
 			}
-			if (split.length == 5) {
-				ItemMeta im = i.getItemMeta();
-				im.setDisplayName(ChatUtils.colorize(split[4]));
-				i.setItemMeta(im);
-			}
-			return i;
 		}
+		return item;
 	}
 
-	public static String getFriendlyItemName(Material m) {
-		String str = m.toString();
-		str = str.replace('_', ' ');
-		str = str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
-		return str;
+	public static ItemStack unserializeItemStack(String items) {
+		ItemStack item = new ItemStack(Material.AIR);
+		ItemMeta meta = item.getItemMeta();
+		if (items.contains(",")) {
+			String[] data = items.replaceAll(" ", "").split(",");
+			if (data[0].contains(":")) {
+				try {
+					item.setType(Material.getMaterial(data[0].split(":")[0]));
+					item.setDurability(Short.parseShort(data[0].split(":")[1]));
+					item.setAmount(Integer.parseInt(data[1]));
+				} catch (NullPointerException x) {
+					try {
+						item.setType(Material.getMaterial(Integer.parseInt(data[0].split(":")[0])));
+						item.setDurability(Short.parseShort(data[0].split(":")[1]));
+						item.setAmount(Integer.parseInt(data[1]));
+					} catch (NullPointerException x1) {
+						item.setType(Material.AIR);
+						item.setDurability((short) 0);
+						item.setAmount(1);
+					}
+				}
+			} else {
+				try {
+					item.setType(Material.getMaterial(data[0]));
+					item.setAmount(Integer.parseInt(data[1]));
+				} catch (NullPointerException x) {
+					try {
+						item.setType(Material.getMaterial(Integer.parseInt(data[0])));
+						item.setAmount(Integer.parseInt(data[1]));
+					} catch (NullPointerException x1) {
+						item.setType(Material.AIR);
+						item.setAmount(1);
+					}
+				}
+			}
+		} else if (items.contains(":")) {
+			String[] data = items.split(":");
+			try {
+				item.setType(Material.getMaterial(data[0]));
+				item.setDurability(Short.parseShort(data[1]));
+			} catch (NullPointerException x) {
+				try {
+					item.setType(Material.getMaterial(Integer.parseInt(data[0])));
+					item.setDurability(Short.parseShort(data[0]));
+				} catch (NullPointerException x1) {
+					item.setType(Material.AIR);
+					item.setDurability((short) 0);
+				}
+			}
+		} else {
+			try {
+				item.setType(Material.getMaterial(items));
+			} catch (NullPointerException x) {
+				try {
+					item.setType(Material.getMaterial(Integer.parseInt(items)));
+				} catch (NullPointerException x1) {
+					item.setType(Material.AIR);
+				}
+			}
+		}
+		return item;
 	}
 }

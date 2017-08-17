@@ -9,6 +9,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -135,10 +136,10 @@ public class PlayerListener implements Listener {
 			player.clear();
 			p.setAllowFlight(true);
 			p.setFlying(true);
-			p.teleport(g.getCurrentMap().getMiddle());
+			p.teleport(Core.get().getGame().getPlayers().get(0).getPlayer().getLocation());
 		} else if (g.getState() == GameState.LOBBY) {
 			g.getPlayers().add(player);
-			e.getPlayer().teleport(Core.get().getMapManager().getLobby().getSpawn());
+			e.getPlayer().teleport(Core.get().getGame().getLobbySpawn());
 		}
 		player.clear();
 
@@ -170,5 +171,10 @@ public class PlayerListener implements Listener {
 			g.checkCancelStart();
 		}
 		GamePlayer.removePlayer(e.getPlayer().getDisplayName());
+	}
+	
+	@EventHandler
+	public void onSpawn(CreatureSpawnEvent e) {
+		e.setCancelled(true);
 	}
 }

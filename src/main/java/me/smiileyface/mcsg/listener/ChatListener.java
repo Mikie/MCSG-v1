@@ -9,6 +9,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import me.smiileyface.backend.Players;
 import me.smiileyface.mcsg.Core;
 import me.smiileyface.mcsg.game.Game;
+import me.smiileyface.mcsg.game.GameState;
 import me.smiileyface.mcsg.player.GamePlayer;
 import me.smiileyface.utils.ChatUtils;
 import net.md_5.bungee.api.ChatColor;
@@ -16,6 +17,7 @@ import net.md_5.bungee.api.ChatColor;
 public class ChatListener implements Listener {
 
 	private static String design = ChatUtils.colorize("&8(&e$t&8)&r$s$p&8> &r$m");
+	private static String gameDesign = ChatUtils.colorize("&8[&c$b&8]&8(&e$t&8)&r$s$p&8> &r$m");
 	private static String specPrefix = ChatColor.DARK_RED + "SPEC" + ChatColor.DARK_GRAY + ":";
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -23,7 +25,10 @@ public class ChatListener implements Listener {
 		if(!e.isCancelled()) {
 			GamePlayer player = Players.getData().getPlayerFromUUID(e.getPlayer());
 			
-			String format = design;
+			String format = Core.get().getGame().getState() == GameState.LOBBY ? design : gameDesign;
+			if(Core.get().getGame().getState() != GameState.LOBBY) {
+				format = format.replace("$b", player.hasBounty() ? player.getBounty() + "" : 0 + "");
+			}
 			format = format.replace("$t", player.getPoints() + "");
 			format = format.replace("$s", player.isInSpecChat() ? specPrefix : "");
 			format = format.replace("$p", player.getRank().getPrefix() + player.getRealName());
