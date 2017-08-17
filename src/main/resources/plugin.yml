@@ -1,0 +1,5 @@
+name: MCSG
+version: 0.1-SNAPSHOT
+author: smiileyface
+main: me.smiileyface.mcsg.Core
+description: A remake of the MCSG v1 plugin.
