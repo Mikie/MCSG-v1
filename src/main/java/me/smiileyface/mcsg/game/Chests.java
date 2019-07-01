@@ -50,7 +50,7 @@ public class Chests implements Listener {
 		c.getInventory().clear();
 		
 		Location l = c.getLocation();
-		String loc = l.getWorld().getName() + "=" + l.getX() + "=" + l.getY() + "=" + l.getZ();
+		String loc = l.getX() + "=" + l.getY() + "=" + l.getZ();
 		
 		Random r = new Random();
 		
@@ -70,7 +70,7 @@ public class Chests implements Listener {
 				}
 			} else {
 				ItemStack it = tier2[r.nextInt(tier2.length)];
-				if(Core.getChests().getBoolean("rarer-tier2") == true) {
+				if(Core.getChests().getBoolean("rarer-tier2")) {
 					if(!c.getInventory().contains(it)) {
 						int slot = r.nextInt(c.getInventory().getSize());
 						c.getInventory().setItem(slot, it);
@@ -112,11 +112,11 @@ public class Chests implements Listener {
 				if(!c.getInventory().contains(it)) {
 					c.getInventory().setItem(slot, it);
 				} else {
-					c.getInventory().addItem(new ItemStack[] { it });
+					c.getInventory().addItem(it);
 				}
 			} else {
 				ItemStack it = tier2[r.nextInt(tier2.length)];
-				if(Core.getChests().getBoolean("rarer-tier2") == true) {
+				if(Core.getChests().getBoolean("rarer-tier2")) {
 					if(!c.getInventory().contains(it)) {
 						int slot = r.nextInt(c.getInventory().getSize());
 						c.getInventory().setItem(slot, it);
@@ -142,7 +142,7 @@ public class Chests implements Listener {
 		emptyChests();
 	}
 	
-	public void emptyChests() {
+	private void emptyChests() {
 		if(opened.size() != 0) {
 			opened.removeAll(opened);
 		}

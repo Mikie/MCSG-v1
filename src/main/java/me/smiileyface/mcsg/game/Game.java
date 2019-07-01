@@ -30,7 +30,7 @@ public class Game {
 	private int maxVotingMaps;
 	private int reqPlayers, maxPlayers;
 	private GameState state;
-	private int lobbyTime = 60 * 3;
+	private int lobbyTime;
 	private int gameTime = 60 * 40;
 	private int deathmatchTime = 60 * 5;
 	private int countdown = 30;
@@ -45,7 +45,7 @@ public class Game {
 	private Location lobbySpawn;
 	private List<GamePlayer> players = new ArrayList<GamePlayer>();
 	private List<GamePlayer> spectators = new ArrayList<GamePlayer>();
-	public ArrayList<GamePlayer> voted = new ArrayList<GamePlayer>();
+	private ArrayList<GamePlayer> voted = new ArrayList<GamePlayer>();
 
 	public ArrayList<String> deadPlayers = new ArrayList<String>();
 
@@ -258,9 +258,6 @@ public class Game {
 
 				Location l = new Location(Bukkit.getWorld(spawn[0]), Double.parseDouble(spawn[1]),
 						Double.parseDouble(spawn[2]), Double.parseDouble(spawn[3]));
-				l.setPitch(Float.parseFloat(spawn[4]));
-				l.setYaw(Float.parseFloat(spawn[5]));
-				l.getChunk().load();
 				players.get(i).getPlayer().teleport(l);
 			}
 		}
@@ -295,7 +292,7 @@ public class Game {
 
 	public void loadMap(VoteMap map) {
 		try {
-			ZipUtils.extractZIP(new File(Core.get().getDataFolder() + "/maps/" + map.mapName + ".zip"), new File(Core.getMaps().getString(map.mapName)));
+			ZipUtils.extractZIP(new File(Core.get().getDataFolder() + "/maps/" + map.mapName + ".zip"), new File(map.mapName));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

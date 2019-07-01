@@ -21,7 +21,6 @@ public class SettingsManager {
 			try {
 				this.file.createNewFile();
 			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 		this.config = YamlConfiguration.loadConfiguration(this.file);

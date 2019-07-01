@@ -19,7 +19,7 @@ public class DBConnection {
 		try {
 			if (c == null || c.isClosed()) {
 				c = DriverManager.getConnection(
-						"jdbc:mysql://localhost:3306/" + Core.get().getConfig().getString("SQL.database"), Core.get().getConfig().getString("SQL.username"),
+						"jdbc:mysql://" + Core.get().getConfig().getString("SQL.host")+ "/" + Core.get().getConfig().getString("SQL.database"), Core.get().getConfig().getString("SQL.username"),
 						Core.get().getConfig().getString("SQL.password"));
 			}
 			return c;

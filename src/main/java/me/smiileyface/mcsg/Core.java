@@ -24,9 +24,9 @@ import me.smiileyface.mcsg.listener.SpectatorListener;
 public class Core extends JavaPlugin implements Listener {
 
 	private final static String SERVERS_DATABASE = "CREATE TABLE IF NOT EXISTS servers (nickname VARCHAR(40), ip VARCHAR(40), port INT, lastchange VARCHAR(40), gamestate INT, mapname VARCHAR(40), players INT);";
-	private final static String PLAYERS_DATABASE = "CREATE TABLE IF NOT EXISTS players (id INT NOT NULL AUTO_INCREMENT, username VARCHAR(40), uuid VARCHAR(256), rank INT, rankExpiry LONG, lastip VARCHAR(40), PRIMARY KEY (id));";
-	private final static String STATS_DATABASE = "CREATE TABLE IF NOT EXISTS stats (username VARCHAR(40), uuid VARCHAR(256), wins INT, losses INT, gamesplayed INT, kills INT, deaths INT, points INT, lifespan LONG, chestsOpened INT);";
-	private final static String PUNISHMENTS_DATABASE = "CREATE TABLE IF NOT EXISTS punishments (id INT NOT NULL, punished VARCHAR(256), ipAddress VARCHAR(40), issuer VARCHAR(256), type VARCHAR(40), reason VARCHAR(256), time VARCHAR(40), end LONG, active BOOL, PRIMARY KEY (id));";
+	private final static String PLAYERS_DATABASE = "CREATE TABLE IF NOT EXISTS players (id INT NOT NULL AUTO_INCREMENT, username VARCHAR(40), uuid VARCHAR(256), `rank` INT, rankExpiry BIGINT, lastip VARCHAR(40), PRIMARY KEY (id));";
+	private final static String STATS_DATABASE = "CREATE TABLE IF NOT EXISTS stats (username VARCHAR(40), uuid VARCHAR(256), wins INT, losses INT, gamesplayed INT, kills INT, deaths INT, points INT, lifespan BIGINT, chestsOpened INT);";
+	private final static String PUNISHMENTS_DATABASE = "CREATE TABLE IF NOT EXISTS punishments (id INT NOT NULL AUTO_INCREMENT, punished VARCHAR(256), ipAddress VARCHAR(40), issuer VARCHAR(256), type VARCHAR(40), reason VARCHAR(256), time VARCHAR(40), end BIGINT, active TINYINT(1), PRIMARY KEY (id));";
 
 	private static Core instance;
 
@@ -50,6 +50,7 @@ public class Core extends JavaPlugin implements Listener {
 		
 		writeToConfig();
 		writeToChests();
+		writeToMaps();
 		
 		getCommand("sg").setExecutor(new AdminCommands());
 		getCommand("vote").setExecutor(new Vote());
@@ -62,6 +63,8 @@ public class Core extends JavaPlugin implements Listener {
 		pm.registerEvents(new PlayerListener(), this);
 		pm.registerEvents(new SpectatorListener(), this);
 		pm.registerEvents(new Chests(), this);
+
+		Chests.c.setTiers();
 
 		try {
 			Connection c = DBConnection.getDatabase().getConnection();
@@ -91,11 +94,13 @@ public class Core extends JavaPlugin implements Listener {
 
 	private void writeToConfig() {
 		c.createPath("SQL", "");
+		c.createPath("SQL.host", "localhost");
 		c.createPath("SQL.database", "mcsg");
 		c.createPath("SQL.username", "root");
 		c.createPath("SQL.password", "Minecraft1337");
 		c.createPath("serverName", "US1");
-		c.createPath("lobby-spawn", "0,75,0,0,0");
+		c.createPath("lobby-spawn", "world=0=75=0=0=0");
+		c.save();
 	}
 
 	private void writeToChests() {
@@ -114,7 +119,17 @@ public class Core extends JavaPlugin implements Listener {
 						"CHAINMAIL_BOOTS", "GOLD_HELMET", "GOLD_CHESTPLATE", "GOLD_LEGGINGS", "GOLD_BOOTS", "ARROW, 5",
 						"ARROW, 7", "FLINT_AND_STEEL", "DIAMOND", "IRON_INGOT", "GOLD_INGOT, 2", "STICK, 2",
 						"GOLDEN_APPLE", "GOLDEN_CARROT", "BAKED_POTATO", "COOKED_BEEF", "COOKED_CHICKEN" });
+		ch.save();
 	}
+
+	private void writeToMaps() {
+		m.createSection("1");
+		m.createPath("1.name", "Example Map");
+		m.createStringList("1.spawns", "1=1=1=1=1", "2=2=2=2=2", "3=3=3=3=3", "4=4=4=4=4");
+        m.createStringList("1.deathmatch-spawns", "1=1=1=1=1", "2=2=2=2=2", "3=3=3=3=3", "4=4=4=4=4");
+        m.createStringList("1.tier2", "1=1=1", "2=2=2", "3=3=3", "4=4=4");
+        m.save();
+    }
 
 	public static SettingsManager getConfigFile() {
 		return c;

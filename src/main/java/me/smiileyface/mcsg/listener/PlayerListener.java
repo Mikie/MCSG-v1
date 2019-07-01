@@ -40,8 +40,7 @@ public class PlayerListener implements Listener {
 			Player p = (Player) e.getPlayer();
 			GamePlayer gp = GamePlayer.getPlayer(p.getDisplayName());
 			if (gp != null) {
-				Location loc = chest.getLocation();
-				loc.getWorld().playSound(loc, Sound.BLOCK_CHEST_CLOSE, 1.0F, 1.0F);
+				p.getLocation().getWorld().playSound(p.getLocation(), Sound.CHEST_CLOSE, 1.0F, 1.0F);
 			}
 		}
 	}

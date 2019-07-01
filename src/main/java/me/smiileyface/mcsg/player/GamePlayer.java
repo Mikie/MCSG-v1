@@ -68,7 +68,7 @@ public class GamePlayer {
 	private Rank rank;
 	private long rankExpiry;
 	
-	private int wins, losses, gamesplayed, kills, deaths, points;
+	private int wins, losses, gamesPlayed, kills, deaths, points;
 	private long lifespan;
 	
 	private int spawnIndex;
@@ -87,7 +87,7 @@ public class GamePlayer {
 		this.rankExpiry = 0;
 		this.wins = 0;
 		this.losses = 0;
-		this.gamesplayed = 0;
+		this.gamesPlayed = 0;
 		this.kills = 0;
 		this.deaths = 0;
 		this.points = 0;
@@ -104,7 +104,7 @@ public class GamePlayer {
 		this.rankExpiry = rankExpiry;
 		this.wins = Stats.getWins().getWins(p);
 		this.losses = Stats.getLosses().getLosses(p);
-		this.gamesplayed = Stats.getGamesPlayed().getGamesPlayed(p);
+		this.gamesPlayed = Stats.getGamesPlayed().getGamesPlayed(p);
 		this.kills = Stats.getKills().getKills(p);
 		this.deaths = Stats.getDeaths().getDeaths(p);
 		this.points = Stats.getPoints().getPoints(p);
@@ -207,7 +207,7 @@ public class GamePlayer {
 	}
 	
 	public int getGamesPlayed() {
-		return gamesplayed;
+		return gamesPlayed;
 	}
 	
 	public void addGamePlayed() {

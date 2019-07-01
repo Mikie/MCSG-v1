@@ -23,11 +23,12 @@ public class PlayerData {
 		try {
 			Connection c = DBConnection.getDatabase().getConnection();
 			PreparedStatement ps = c
-					.prepareStatement("INSERT INTO players(username, uuid, lastip, rank) VALUES (?,?,?,?)");
+					.prepareStatement("INSERT INTO players(username, uuid, lastip, `rank`, rankExpiry) VALUES (?,?,?,?,?)");
 			ps.setString(1, player.getName());
 			ps.setString(2, player.getUniqueId().toString());
 			ps.setString(3, player.getAddress().getHostString());
 			ps.setInt(4, 0);
+			ps.setLong(5, 0);
 			ps.executeUpdate();
 			ps.close();
 		} catch (SQLException e) {
@@ -72,7 +73,7 @@ public class PlayerData {
 				}
 				player = new GamePlayer(p, 
 						rs.getInt("rank"),
-						Long.parseLong(rs.getString("rankexpiry")));
+						Long.parseLong(rs.getString("rankExpiry")));
 				return player;
 			} else {
 				throw new NullPointerException();
@@ -100,7 +101,7 @@ public class PlayerData {
 			if (has) {
 				player = new GamePlayer(p, 
 						rs.getInt("rank"),
-						Long.parseLong(rs.getString("rankexpiry")));
+						Long.parseLong(rs.getString("rankExpiry")));
 				return player;
 			} else {
 				addPlayerToDatabase(p);

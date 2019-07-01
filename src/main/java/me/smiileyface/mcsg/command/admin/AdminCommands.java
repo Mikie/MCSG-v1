@@ -24,12 +24,12 @@ public class AdminCommands implements CommandExecutor {
 			if ((sender instanceof Player)) {
 				Player p = (Player) sender;
 				if (args.length == 0) {
-					if (GamePlayer.getPlayer(p.getDisplayName()).getRank().has(p, Rank.ADMIN, true)) {
+					if (GamePlayer.getPlayer(p.getName()).getRank().has(p, Rank.ADMIN, true)) {
 						p.sendMessage(ChatUtils.colorize(
 								"&6SurvivalGames Help \n &6/sg disable &a- Disables the game. Used for when setting maps, or editing something. \n&6/sg enable &a- Enable the game after it's disabled. \n&6/sg setlobbyspawn &a- Set the spawn point of the lobby. \n&6/sg refillchests &a- Restocks the chests. \n&6/sg forcedm &a- Sets the time to the minimum players time. \n&6/sg map create <mapname> &a- Create a map. \n&6/sg map addspawn <mapname> &a- Add a spawn to a specific map. \n&6/sg map addtier2 <mapname> &a- Add a tier2 chest to a specific map. \n&6/sg map adddmspawn <mapname> &a- Add a spawn the deathmatch spawn of a specific map. \n&6/sg usercommands &a- List of the commands meant for users."));
 					}
 				} else if(args.length == 1) {
-					if((args[0].equalsIgnoreCase("setlobbyspawn")) && (GamePlayer.getPlayer(p.getDisplayName()).getRank().has(p, Rank.ADMIN, true))) {
+					if((args[0].equalsIgnoreCase("setlobbyspawn")) && (GamePlayer.getPlayer(p.getName()).getRank().has(p, Rank.ADMIN, true))) {
 						String locationSerialized = p.getWorld().getName() + "=" + p.getLocation().getX() + "=" + p.getLocation().getY() + "=" + p.getLocation().getZ() + "=" + p.getLocation().getPitch() + "=" + p.getLocation().getYaw();
 			            Core.getConfigFile().setPath("lobby-spawn", locationSerialized);
 			            p.sendMessage(ChatUtils.modulate("SurvivalGames", "Successfully set lobby spawn."));
@@ -37,7 +37,7 @@ public class AdminCommands implements CommandExecutor {
 					if(args[0].equalsIgnoreCase("usercommands")) {
 						p.sendMessage(ChatUtils.colorize("&6SurvivalGames User Commands \n&6/vote &a-Opens the voting GUI \n&6/stats (<player>) &a-Check your/other stats. \n&6/resetstats &a- Reset your stats \n&6/info &a- Shows info about game and server.")); 
 					}
-					if((args[0].equalsIgnoreCase("disable")) && (GamePlayer.getPlayer(p.getDisplayName()).getRank().has(p, Rank.ADMIN, true))) {
+					if((args[0].equalsIgnoreCase("disable")) && (GamePlayer.getPlayer(p.getName()).getRank().has(p, Rank.ADMIN, true))) {
 						if(!Core.get().getGame().getState().equals(GameState.DEAD)) {
 							Core.get().getGame().setState(GameState.DEAD);
 							Bukkit.getScheduler().cancelAllTasks();
@@ -46,7 +46,7 @@ public class AdminCommands implements CommandExecutor {
 							p.sendMessage(ChatUtils.modulate("SurvivalGames", "The game is already disabled."));
 						}
 					}
-					if((args[0].equalsIgnoreCase("enable")) && (GamePlayer.getPlayer(p.getDisplayName()).getRank().has(p, Rank.ADMIN, true))) {
+					if((args[0].equalsIgnoreCase("enable")) && (GamePlayer.getPlayer(p.getName()).getRank().has(p, Rank.ADMIN, true))) {
 						if(!Core.get().getGame().getState().equals(GameState.DEAD)) {
 							p.sendMessage(ChatUtils.modulate("SurvivalGames", "The game is already enabled."));
 						} else {
@@ -64,11 +64,11 @@ public class AdminCommands implements CommandExecutor {
 							}, 20 * 10);
 						}
 					}
-					if((args[0].equalsIgnoreCase("refillchests")) && (GamePlayer.getPlayer(p.getDisplayName()).getRank().has(p, Rank.ADMIN, true))) {
+					if((args[0].equalsIgnoreCase("refillchests")) && (GamePlayer.getPlayer(p.getName()).getRank().has(p, Rank.ADMIN, true))) {
 						Chests.c.refill();
 						Bukkit.broadcastMessage(ChatUtils.modulate("SurvivalGames", "The chests have been refilled!"));
 					}
-					if((args[0].equalsIgnoreCase("forcedm")) && (GamePlayer.getPlayer(p.getDisplayName()).getRank().has(p, Rank.ADMIN, true))) {
+					if((args[0].equalsIgnoreCase("forcedm")) && (GamePlayer.getPlayer(p.getName()).getRank().has(p, Rank.ADMIN, true))) {
 						Bukkit.broadcastMessage(ChatUtils.modulate("SurvivalGames", "Deathmatch has been forced by " + p.getName()));
 						Bukkit.getScheduler().runTaskTimer(Core.get(), new Runnable() {
 							int timer = 30;
@@ -86,12 +86,12 @@ public class AdminCommands implements CommandExecutor {
 						}, 20L, 20L);
 					}
 				} else if(args.length == 2) {
-					if((args[0].equalsIgnoreCase("reload")) && (GamePlayer.getPlayer(p.getDisplayName()).getRank().has(p, Rank.ADMIN, true))) {
+					if((args[0].equalsIgnoreCase("reload")) && (GamePlayer.getPlayer(p.getName()).getRank().has(p, Rank.ADMIN, true))) {
 						if(args[1].equalsIgnoreCase("c")) {
 							Core.getConfigFile().save();
 						}
 					}
-				} else if((args.length == 3) && (args[0].equalsIgnoreCase("map") && (GamePlayer.getPlayer(p.getDisplayName()).getRank().has(p, Rank.ADMIN, true)))) {
+				} else if((args.length == 3) && (args[0].equalsIgnoreCase("map") && (GamePlayer.getPlayer(p.getName()).getRank().has(p, Rank.ADMIN, true)))) {
 					if((args[1].equalsIgnoreCase("create"))) {
 						String mapName = args[2];
 						for(int i = 0; i < 999; i++) {
