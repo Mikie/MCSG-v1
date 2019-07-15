@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
@@ -39,14 +40,15 @@ public class Chests implements Listener {
 			if(ItemUtil.unserializeItemStack((String)Core.getChests().getList("tier2").get(i)).getType() == Material.FLINT_AND_STEEL) {
 				ItemStack ist = ItemUtil.unserializeItemStack((String)Core.getChests().getList("tier2").get(i));
 				ist.setDurability((short)(64 - Core.getConfigFile().getInt("fns-uses")));
-				tier1[1] = ist;
+				tier2[1] = ist;
 			} else {
-				tier1[i] = ItemUtil.unserializeItemStack((String)Core.getChests().getList("tier2").get(i));
+				tier2[i] = ItemUtil.unserializeItemStack((String)Core.getChests().getList("tier2").get(i));
 			}
 		}
 	}
 	
 	public void fillChest(Chest c) {
+	    Bukkit.broadcastMessage("Filling Chest");
 		c.getInventory().clear();
 		
 		Location l = c.getLocation();
@@ -56,11 +58,10 @@ public class Chests implements Listener {
 		
 		int max = Core.getChests().getInt("max-items");
 		
-		int a = r.nextInt(max);
-		if(a == 0)
-			a = 1;
+		int a = r.nextInt(max) + 1;
 		for(int i = 0; i < a; i++) {
 			if(!Core.getMaps().getList(Core.get().getGame().getCurrentMap() + ".tier2").contains(loc)) {
+			    Bukkit.broadcastMessage("Chest is Tier 1");
 				ItemStack it = tier1[r.nextInt(tier1.length)];
 				int slot = r.nextInt(c.getInventory().getSize());
 				if(!c.getInventory().contains(it)) {
@@ -69,6 +70,7 @@ public class Chests implements Listener {
 					c.getInventory().addItem(new ItemStack[] { it });
 				}
 			} else {
+			    Bukkit.broadcastMessage("Chest is Tier 2");
 				ItemStack it = tier2[r.nextInt(tier2.length)];
 				if(Core.getChests().getBoolean("rarer-tier2")) {
 					if(!c.getInventory().contains(it)) {
@@ -151,9 +153,12 @@ public class Chests implements Listener {
 	@EventHandler
 	public void onOpen(final PlayerInteractEvent e) {
 		if((e.getAction() == Action.RIGHT_CLICK_BLOCK) && (e.getClickedBlock().getType() == Material.CHEST)) {
+			Bukkit.broadcastMessage("Chest Right Clicked");
 			if(Core.get().getGame().getState() == GameState.IN_GAME || Core.get().getGame().getState() == GameState.DEATHMATCH) {
+			    Bukkit.broadcastMessage("Game state is " + Core.get().getGame().getState());
 				Chest c = (Chest)e.getClickedBlock().getState();
 				if(!opened.contains(c.getLocation())) {
+				    Bukkit.broadcastMessage("Chest not opened");
 					fillChest(c);
 					Stats.getChestsOpened().setChestsOpened(e.getPlayer().getUniqueId(), Stats.getChestsOpened().getChestsOpened(e.getPlayer()) + 1);
 				}

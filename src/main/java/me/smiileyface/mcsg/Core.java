@@ -12,7 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.smiileyface.backend.Servers;
 import me.smiileyface.backend.database.DBConnection;
-import me.smiileyface.mcsg.command.admin.AdminCommands;
+import me.smiileyface.mcsg.command.admin.GameCommands;
 import me.smiileyface.mcsg.command.user.Vote;
 import me.smiileyface.mcsg.event.GameStateChangeEvent;
 import me.smiileyface.mcsg.game.Chests;
@@ -52,7 +52,7 @@ public class Core extends JavaPlugin implements Listener {
 		writeToChests();
 		writeToMaps();
 		
-		getCommand("sg").setExecutor(new AdminCommands());
+		getCommand("sg").setExecutor(new GameCommands());
 		getCommand("vote").setExecutor(new Vote());
 		
 		game = new Game(true, 60 * 3, 4, 2);

@@ -149,9 +149,13 @@ public class PlayerListener implements Listener {
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e) {
+        if(g.getState() == GameState.LOBBY) {
+            g.checkCancelStart();
+        }
 		if (g.getSpectators().contains(e.getPlayer())) {
 			g.getSpectators().remove(e.getPlayer());
-		} else {
+		}
+		if((g.getState() == GameState.IN_GAME || g.getState() == GameState.DEATHMATCH) && (g.getPlayers().contains(e.getPlayer()))) {
 			g.getGamePhase().killPlayer(GamePlayer.getPlayer(e.getPlayer().getDisplayName()), null, true);
 			g.getPlayers().remove(e.getPlayer());
 			if (g.getState() == GameState.IN_GAME || g.getState() == GameState.DEATHMATCH) {
